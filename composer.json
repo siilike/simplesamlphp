@@ -102,7 +102,7 @@
             "phpstan/extension-installer": true,
             "simplesamlphp/composer-module-installer": true
         }
-    }
+    },
     "extra": {
         "branch-alias": {
             "dev-master": "2.4.0.x-dev"
