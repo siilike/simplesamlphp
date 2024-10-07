@@ -5,12 +5,9 @@ declare(strict_types=1);
 namespace SimpleSAML\Module\core\Auth\Source;
 
 use Exception;
-use SimpleSAML\Assert\Assert;
 use SimpleSAML\Auth;
 use SimpleSAML\Configuration;
 use SimpleSAML\Error;
-use SimpleSAML\HTTP\RunnableResponse;
-use SimpleSAML\Session;
 
 /**
  * Authentication source which delegates authentication to secondary
@@ -64,6 +61,7 @@ abstract class AbstractSourceSelector extends Auth\Source
             throw new Exception('Invalid authentication source: ' . $source);
         }
 
+        $state['sourceSelector:selected'] = $source;
         static::doAuthentication($as, $state);
     }
 

@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace SimpleSAML\Metadata\Sources;
 
 use Exception;
-use RobRichards\XMLSecLibs\XMLSecurityDSig;
-use SimpleSAML\Assert\Assert;
 use SimpleSAML\Configuration;
 use SimpleSAML\Error;
 use SimpleSAML\Logger;
@@ -18,12 +16,12 @@ use Symfony\Component\HttpFoundation\File\File;
 use function array_key_exists;
 use function error_get_last;
 use function is_array;
-use function serialize;
+use function json_decode;
+use function json_encode;
 use function sha1;
 use function sprintf;
 use function strval;
 use function time;
-use function unserialize;
 use function urlencode;
 
 /**
@@ -135,7 +133,7 @@ class MDQ extends MetaDataStorageSource
         }
 
         $cachekey = sha1($entityId);
-        return $this->cacheDir . '/' . $set . '-' . $cachekey . '.cached.xml';
+        return $this->cacheDir . '/' . $set . '-' . $cachekey . '.cached.json';
     }
 
 
@@ -188,10 +186,11 @@ class MDQ extends MetaDataStorageSource
             ));
         }
 
-        $data = unserialize($rawData);
+        // ensure json is decoded as an associative array not an object
+        $data = json_decode($rawData, true, 512, JSON_THROW_ON_ERROR);
         if ($data === false) {
             throw new Exception(
-                sprintf('%s: error unserializing cached data from file "%s".', __CLASS__, strval($file))
+                sprintf('%s: error unserializing cached data from file "%s".', __CLASS__, strval($file)),
             );
         }
 
@@ -222,8 +221,7 @@ class MDQ extends MetaDataStorageSource
 
         Logger::debug(sprintf('%s: Writing cache [%s] => [%s]', __CLASS__, $entityId, $cacheFileName));
 
-        /** @psalm-suppress TooManyArguments */
-        $this->fileSystem->appendToFile($cacheFileName, serialize($data), true);
+        $this->fileSystem->dumpFile($cacheFileName, json_encode($data, JSON_THROW_ON_ERROR));
     }
 
 
@@ -285,7 +283,7 @@ class MDQ extends MetaDataStorageSource
         }
 
         if (isset($data)) {
-            if (array_key_exists('expires', $data) && $data['expires'] < time()) {
+            if (array_key_exists('expire', $data) && $data['expire'] < time()) {
                 // metadata has expired
                 $data = null;
             } else {
@@ -300,8 +298,13 @@ class MDQ extends MetaDataStorageSource
 
         Logger::debug(sprintf('%s: downloading metadata for "%s" from [%s]', __CLASS__, $entityId, $mdq_url));
         $httpUtils = new Utils\HTTP();
+        $context = [
+            'http' => [
+                'header' => 'Accept: application/samlmetadata+xml',
+            ],
+        ];
         try {
-            $xmldata = $httpUtils->fetch($mdq_url);
+            $xmldata = $httpUtils->fetch($mdq_url, $context);
         } catch (Exception $e) {
             // Avoid propagating the exception, make sure we can handle the error later
             $xmldata = false;
@@ -313,7 +316,7 @@ class MDQ extends MetaDataStorageSource
                 'Unable to fetch metadata for "%s" from %s: %s',
                 $entityId,
                 $mdq_url,
-                (is_array($error) ? $error['message'] : 'no error available')
+                (is_array($error) ? $error['message'] : 'no error available'),
             ));
             return null;
         }
@@ -333,7 +336,7 @@ class MDQ extends MetaDataStorageSource
         $data = self::getParsedSet($entity, $set);
         if ($data === null) {
             throw new Exception(
-                sprintf('%s: no metadata for set "%s" available from "%s".', __CLASS__, $set, $entityId)
+                sprintf('%s: no metadata for set "%s" available from "%s".', __CLASS__, $set, $entityId),
             );
         }
 

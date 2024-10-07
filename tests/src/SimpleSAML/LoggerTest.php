@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SimpleSAML\Test;
 
 use Exception;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\Configuration;
 use SimpleSAML\Logger;
@@ -26,7 +27,7 @@ class LoggerTest extends TestCase
         $this->originalLogger = Logger::getLoggingHandler();
         $config = [
             'logging.handler' => $handler,
-            'logging.level' => Logger::DEBUG
+            'logging.level' => Logger::DEBUG,
         ];
 
         // testing static methods is slightly painful
@@ -91,7 +92,7 @@ class LoggerTest extends TestCase
 
         $this->expectException(Exception::class);
         $this->expectExceptionMessage(
-            "Invalid value for the 'logging.handler' configuration option. Unknown handler 'nohandler'."
+            "Invalid value for the 'logging.handler' configuration option. Unknown handler 'nohandler'.",
         );
 
         Logger::critical('should throw exception');
@@ -101,7 +102,7 @@ class LoggerTest extends TestCase
     /**
      * @return array
      */
-    public function provideLogLevels(): array
+    public static function provideLogLevels(): array
     {
         return [
            'emergency' => ['emergency', Logger::EMERG],
@@ -119,8 +120,8 @@ class LoggerTest extends TestCase
     /**
      * @param string $method
      * @param int $level
-     * @dataProvider provideLogLevels
      */
+    #[DataProvider('provideLogLevels')]
     public function testLevelMethods(string $method, int $level): void
     {
         $this->setLoggingHandler(ArrayLogger::class);

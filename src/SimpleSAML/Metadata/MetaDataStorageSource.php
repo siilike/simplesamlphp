@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Metadata;
 
-use SimpleSAML\Assert\Assert;
 use SimpleSAML\Error;
 use SimpleSAML\Module;
 use SimpleSAML\Utils;
@@ -96,18 +95,20 @@ abstract class MetaDataStorageSource
                 return new Sources\MDQ($sourceConfig);
             case 'pdo':
                 return new MetaDataStorageHandlerPdo($sourceConfig);
+            case 'directory':
+                return new MetaDataStorageHandlerDirectory($sourceConfig);
             default:
                 // metadata store from module
                 try {
                     $className = Module::resolveClass(
                         $type,
                         'MetadataStore',
-                        '\SimpleSAML\Metadata\MetaDataStorageSource'
+                        '\SimpleSAML\Metadata\MetaDataStorageSource',
                     );
                 } catch (\Exception $e) {
                     throw new Error\CriticalConfigurationError(
                         "Invalid 'type' for metadata source. Cannot find store '$type'.",
-                        null
+                        null,
                     );
                 }
 
@@ -302,7 +303,7 @@ abstract class MetaDataStorageSource
      * @param array $metadataSet the already loaded metadata set
      * @return mixed|null
      */
-    protected function lookupIndexFromEntityId(string $entityId, array $metadataSet)
+    protected function lookupIndexFromEntityId(string $entityId, array $metadataSet): mixed
     {
         // check for hostname
         $httpUtils = new Utils\HTTP();
@@ -322,28 +323,5 @@ abstract class MetaDataStorageSource
         }
 
         return null;
-    }
-
-
-    /**
-     * @param string $set
-     * @throws \Exception
-     * @return string
-     */
-    private function getDynamicHostedUrl(string $set): string
-    {
-        // get the configuration
-        $httpUtils = new Utils\HTTP();
-        $baseUrl = $httpUtils->getBaseURL();
-
-        if ($set === 'saml20-idp-hosted') {
-            return $baseUrl . 'saml2/idp/metadata.php';
-        } elseif ($set === 'saml20-sp-hosted') {
-            return $baseUrl . 'saml2/sp/metadata.php';
-        } elseif ($set === 'adfs-idp-hosted') {
-            return 'urn:federation:' . $httpUtils->getSelfHost() . ':idp';
-        } else {
-            throw new \Exception('Can not generate dynamic EntityID for metadata of this type: [' . $set . ']');
-        }
     }
 }

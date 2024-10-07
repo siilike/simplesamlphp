@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Test\Utils;
 
-use InvalidArgumentException;
-use org\bovigo\vfs\vfsStream;
-use org\bovigo\vfs\vfsStreamDirectory;
+use org\bovigo\vfs\{vfsStream, vfsStreamDirectory};
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use SimpleSAML\Configuration;
@@ -15,9 +14,8 @@ use SimpleSAML\Utils;
 
 /**
  * Tests for SimpleSAML\Utils\System.
- *
- * @covers \SimpleSAML\Utils\System
  */
+#[CoversClass(Utils\System::class)]
 class SystemTest extends TestCase
 {
     private const ROOTDIRNAME = 'testdir';
@@ -43,7 +41,7 @@ class SystemTest extends TestCase
             null,
             [
                 self::DEFAULTTEMPDIR => [],
-            ]
+            ],
         );
         $this->root_directory = vfsStream::url(self::ROOTDIRNAME);
         $this->sysUtils = new Utils\System();
@@ -51,7 +49,6 @@ class SystemTest extends TestCase
 
 
     /**
-     * @test
      */
     public function testGetOSBasic(): void
     {
@@ -62,7 +59,6 @@ class SystemTest extends TestCase
 
 
     /**
-     * @test
      */
     public function testResolvePathRemoveTrailingSlashes(): void
     {
@@ -77,7 +73,6 @@ class SystemTest extends TestCase
 
 
     /**
-     * @test
      */
     public function testResolvePathPreferAbsolutePathToBase(): void
     {
@@ -92,7 +87,6 @@ class SystemTest extends TestCase
 
 
     /**
-     * @test
      */
     public function testResolvePathCurDirPath(): void
     {
@@ -107,7 +101,6 @@ class SystemTest extends TestCase
 
 
     /**
-     * @test
      */
     public function testResolvePathParentPath(): void
     {
@@ -122,7 +115,6 @@ class SystemTest extends TestCase
 
 
     /**
-     * @test
      */
     public function testResolvePathAllowsStreamWrappers(): void
     {
@@ -137,7 +129,6 @@ class SystemTest extends TestCase
 
 
     /**
-     * @test
      */
     public function testResolvePathAllowsAwsS3StreamWrappers(): void
     {
@@ -152,7 +143,6 @@ class SystemTest extends TestCase
 
 
     /**
-     * @test
      */
     public function testWriteFileBasic(): void
     {
@@ -170,7 +160,6 @@ class SystemTest extends TestCase
 
 
     /**
-     * @test
      */
     public function testWriteFileContents(): void
     {
@@ -192,7 +181,6 @@ class SystemTest extends TestCase
 
 
     /**
-     * @test
      */
     public function testWriteFileMode(): void
     {
@@ -214,7 +202,6 @@ class SystemTest extends TestCase
 
 
     /**
-     * @test
      */
     public function testGetTempDirBasic(): void
     {
@@ -232,7 +219,6 @@ class SystemTest extends TestCase
 
 
     /**
-     * @test
      */
     public function testGetTempDirNonExistent(): void
     {
@@ -250,7 +236,6 @@ class SystemTest extends TestCase
 
 
     /**
-     * @test
      */
     public function testGetTempDirBadPermissions(): void
     {

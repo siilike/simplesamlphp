@@ -4,21 +4,20 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Test\Module\admin\Controller;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\Configuration;
 use SimpleSAML\Module\admin\Controller;
 use SimpleSAML\Session;
 use SimpleSAML\Utils;
-use SimpleSAML\XHTML\Template;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Set of tests for the controllers in the "admin" module.
  *
- * @covers \SimpleSAML\Module\admin\Controller\Config
  * @package SimpleSAML\Test
  */
+#[CoversClass(Controller\Config::class)]
 class ConfigTest extends TestCase
 {
     /** @var \SimpleSAML\Configuration */
@@ -42,7 +41,7 @@ class ConfigTest extends TestCase
             [
                 'module.enable' => ['admin' => true],
                 'secretsalt' => 'defaultsecretsalt',
-                'admin.checkforupdates' => true
+                'admin.checkforupdates' => true,
             ],
             '[ARRAY]'
         ) extends Configuration
@@ -57,7 +56,7 @@ class ConfigTest extends TestCase
         $this->config::setPreloadedConfig(
             Configuration::loadFromArray([], '[ARRAY]', 'simplesaml'),
             'config.php',
-            'simplesaml'
+            'simplesaml',
         );
 
         $this->authUtils = new class () extends Utils\Auth {
@@ -82,7 +81,7 @@ class ConfigTest extends TestCase
         $_SERVER['REQUEST_URI'] = '/module.php/admin/diagnostics';
         $request = Request::create(
             '/diagnostics',
-            'GET'
+            'GET',
         );
 
         $c = new Controller\Config($this->config, $this->session);
@@ -100,7 +99,7 @@ class ConfigTest extends TestCase
         $_SERVER['REQUEST_URI'] = '/module.php/admin';
         $request = Request::create(
             '/',
-            'GET'
+            'GET',
         );
 
         $c = new Controller\Config($this->config, $this->session);
@@ -118,7 +117,7 @@ class ConfigTest extends TestCase
         $_SERVER['REQUEST_URI'] = '/module.php/admin/phpinfo';
         $request = Request::create(
             '/phpinfo',
-            'GET'
+            'GET',
         );
 
         $c = new Controller\Config($this->config, $this->session);

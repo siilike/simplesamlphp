@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Test;
 
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use SimpleSAML\{Configuration, Session};
 use SimpleSAML\TestUtils\ClearStateTestCase;
-use SimpleSAML\Session;
-use SimpleSAML\Configuration;
 
 /**
- * @covers \SimpleSAML\Session
  */
+#[CoversClass(Session::class)]
 class SessionTest extends ClearStateTestCase
 {
     /** @var \SimpleSAML\Session */

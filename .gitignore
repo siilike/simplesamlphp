@@ -1,12 +1,17 @@
 cert/*
 config/*
 metadata/*
+!/.github/build/*.json
 !/cert/*.gitkeep
 !/config/*.dist
 !/metadata/*.dist
 !/public/assets/.gitkeep
 /public/assets/*
+.phpunit.cache/
 .phpunit.result.cache
+phpunit.xml.bak
+.phive
+**.mo
 
 # https://www.gitignore.io/api/osx,windows,linux,netbeans,sublimetext,composer,phpstorm,vagrant
 # Created by https://www.gitignore.io

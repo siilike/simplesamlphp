@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Test\Module\admin\Controller;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SAML2\XML\saml\NameID;
 use SimpleSAML\Auth;
@@ -15,14 +16,13 @@ use SimpleSAML\Session;
 use SimpleSAML\Utils;
 use SimpleSAML\XHTML\Template;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Set of tests for the controllers in the "admin" module.
  *
- * @covers \SimpleSAML\Module\admin\Controller\Test
  * @package SimpleSAML\Test
  */
+#[CoversClass(TestController::class)]
 class TestTest extends TestCase
 {
     /** @var \SimpleSAML\Configuration */
@@ -47,7 +47,7 @@ class TestTest extends TestCase
                 'module.enable' => ['admin' => true],
             ],
             '[ARRAY]',
-            'simplesaml'
+            'simplesaml',
         );
 
         $this->authUtils = new class () extends Utils\Auth {
@@ -65,10 +65,10 @@ class TestTest extends TestCase
                     'admin' => ['core:AdminPassword'],
                 ],
                 '[ARRAY]',
-                'simplesaml'
+                'simplesaml',
             ),
             'authsources.php',
-            'simplesaml'
+            'simplesaml',
         );
     }
 
@@ -80,7 +80,7 @@ class TestTest extends TestCase
         $_SERVER['REQUEST_URI'] = '/module.php/admin/test';
         $request = Request::create(
             '/test',
-            'GET'
+            'GET',
         );
 
         $c = new TestController($this->config, $this->session);
@@ -100,7 +100,7 @@ class TestTest extends TestCase
         $request = Request::create(
             '/test',
             'GET',
-            ['logout' => 'notnull']
+            ['logout' => 'notnull'],
         );
 
         $c = new TestController($this->config, $this->session);
@@ -125,7 +125,7 @@ class TestTest extends TestCase
     {
         $request = Request::create(
             '/logout',
-            'GET'
+            'GET',
         );
 
         $c = new TestController($this->config, $this->session);
@@ -144,7 +144,7 @@ class TestTest extends TestCase
         $request = Request::create(
             '/test',
             'GET',
-            [Auth\State::EXCEPTION_PARAM => 'someException']
+            [Auth\State::EXCEPTION_PARAM => 'someException'],
         );
 
         $c = new TestController($this->config, $this->session);
@@ -157,7 +157,7 @@ class TestTest extends TestCase
         });
 
         $this->expectException(Error\NoState::class);
-        $this->expectExceptionMessage('NOSTATE');
+        $this->expectExceptionMessage(Error\ErrorCodes::NOSTATE);
         $c->main($request, 'admin');
     }
 
@@ -170,7 +170,7 @@ class TestTest extends TestCase
         $request = Request::create(
             '/test',
             'GET',
-            ['as' => 'admin']
+            ['as' => 'admin'],
         );
 
         $c = new TestController($this->config, $this->session);
@@ -201,7 +201,7 @@ class TestTest extends TestCase
         $_SERVER['REQUEST_URI'] = '/module.php/admin/test';
         $request = Request::create(
             '/test',
-            'GET'
+            'GET',
         );
 
         $c = new TestController($this->config, $this->session);
@@ -224,30 +224,30 @@ class TestTest extends TestCase
                 /** @psalm-suppress PossiblyNullPropertyFetch */
                 return [
                     'urn:mace:dir:attribute-def:cn' => [
-                        'Tim van Dijen'
+                        'Tim van Dijen',
                     ],
                     'urn:mace:dir:attribute-def:givenName' => [
-                        'Tim'
+                        'Tim',
                     ],
                     'urn:mace:dir:attribute-def:sn' => [
-                        'van Dijen'
+                        'van Dijen',
                     ],
                     'urn:mace:dir:attribute-def:displayName' => [
-                        'Mr. T. van Dijen BSc'
+                        'Mr. T. van Dijen BSc',
                     ],
                     'urn:mace:dir:attribute-def:mail' => [
                         'tvdijen@hotmail.com',
-                        'tvdijen@gmail.com'
+                        'tvdijen@gmail.com',
                     ],
                     'urn:mace:dir:attribute-def:eduPersonTargetedID' => [
-                        $nameId->toXML()->ownerDocument->childNodes
+                        $nameId->toXML()->ownerDocument->childNodes,
                     ],
                     'jpegPhoto' => [
-                        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
+                        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
                     ],
                     'nameId' => [
-                        $nameId
-                    ]
+                        $nameId,
+                    ],
                 ];
             }
 
@@ -256,7 +256,7 @@ class TestTest extends TestCase
                 return [];
             }
 
-            public function getAuthData(string $name)
+            public function getAuthData(string $name): mixed
             {
                 $nameId = new NameID();
                 $nameId->setValue('_b806c4f98188b42e48d3eb5444db613dbde463e2e8');

@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Test\Module\core\Auth;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SAML2\Constants;
 use SimpleSAML\Error\Error as SspError;
+use SimpleSAML\Error\ErrorCodes;
 use SimpleSAML\Module\core\Auth\UserPassBase;
 
 /**
- * @covers \SimpleSAML\Module\core\Auth\UserPassBase
  */
+#[CoversClass(UserPassBase::class)]
 class UserPassBaseTest extends TestCase
 {
     /**
@@ -28,7 +30,7 @@ class UserPassBaseTest extends TestCase
 
         $stub = $this->getMockBuilder(UserPassBase::class)
             ->disableOriginalConstructor()
-            ->setMethods(['login'])
+            ->onlyMethods(['login'])
             ->getMockForAbstractClass();
 
         $stub->expects($this->once())
@@ -48,7 +50,7 @@ class UserPassBaseTest extends TestCase
     public function testAuthenticateECPMissingUsername(): void
     {
         $this->expectException(SspError::class);
-        $this->expectExceptionMessage('WRONGUSERPASS');
+        $this->expectExceptionMessage(ErrorCodes::WRONGUSERPASS);
 
         $state = [
             'saml:Binding' => Constants::BINDING_PAOS,
@@ -71,7 +73,7 @@ class UserPassBaseTest extends TestCase
     public function testAuthenticateECPMissingPassword(): void
     {
         $this->expectException(SspError::class);
-        $this->expectExceptionMessage('WRONGUSERPASS');
+        $this->expectExceptionMessage(ErrorCodes::WRONGUSERPASS);
 
         $state = [
             'saml:Binding' => Constants::BINDING_PAOS,
@@ -105,8 +107,8 @@ class UserPassBaseTest extends TestCase
 
         $stub = $this->getMockBuilder(UserPassBase::class)
             ->disableOriginalConstructor()
-            ->setMethods(['login'])
-            ->getMockForAbstractClass();
+            ->onlyMethods(['login'])
+            ->getMock();
 
         $stub->expects($this->once())
             ->method('login')

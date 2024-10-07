@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Test\Module\saml\Controller;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\Configuration;
 use SimpleSAML\Error;
 use SimpleSAML\HTTP\RunnableResponse;
 use SimpleSAML\Metadata\MetaDataStorageHandler;
 use SimpleSAML\Module\saml\Controller;
-use SimpleSAML\Session;
 use SimpleSAML\Utils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,9 +19,9 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Set of tests for the controllers in the "saml" module.
  *
- * @covers \SimpleSAML\Module\saml\Controller\Metadata
  * @package SimpleSAML\Test
  */
+#[CoversClass(Controller\Metadata::class)]
 class MetadataTest extends TestCase
 {
     /** @var \SimpleSAML\Configuration */
@@ -39,7 +40,7 @@ class MetadataTest extends TestCase
 
         $this->mdh = new class () extends MetaDataStorageHandler {
             /** @var string */
-            private const XMLSEC = '../vendor/simplesamlphp/xml-security/tests/resources';
+            private const XMLSEC = '../vendor/simplesamlphp/xml-security/resources';
 
             /** @var string */
             public const CERT_KEY = self::XMLSEC . '/certificates/selfsigned.simplesamlphp.org.key';
@@ -101,7 +102,7 @@ class MetadataTest extends TestCase
                 'admin.protectmetadata' => false,
             ],
             '[ARRAY]',
-            'simplesaml'
+            'simplesaml',
         );
         Configuration::setPreLoadedConfig($this->config, 'config.php');
 
@@ -112,10 +113,10 @@ class MetadataTest extends TestCase
                     'phpunit' => ['saml:SP'],
                 ],
                 '[ARRAY]',
-                'simplesaml'
+                'simplesaml',
             ),
             'authsources.php',
-            'simplesaml'
+            'simplesaml',
         );
 
         $this->authUtils = new class () extends Utils\Auth {
@@ -132,9 +133,8 @@ class MetadataTest extends TestCase
     /**
      * Test that accessing the metadata-endpoint with or without authentication
      * and admin.protectmetadata set to true or false is handled properly
-     *
-     * @dataProvider provideMetadataAccess
      */
+    #[DataProvider('provideMetadataAccess')]
     public function testMetadataAccess(bool $authenticated, bool $protected): void
     {
         $config = Configuration::loadFromArray(
@@ -144,7 +144,7 @@ class MetadataTest extends TestCase
                 'admin.protectmetadata' => $protected,
             ],
             '[ARRAY]',
-            'simplesaml'
+            'simplesaml',
         );
         Configuration::setPreLoadedConfig($config, 'config.php');
 
@@ -171,9 +171,15 @@ class MetadataTest extends TestCase
         } else {
             $this->assertInstanceOf(Response::class, $result);
         }
+
+        if ($protected === true) {
+            $this->assertEquals('no-cache, private', $result->headers->get('cache-control'));
+        } else {
+            $this->assertEquals('public', $result->headers->get('cache-control'));
+        }
     }
 
-    public function provideMetadataAccess(): array
+    public static function provideMetadataAccess(): array
     {
         return [
            /* [authenticated, protected] */
@@ -195,7 +201,7 @@ class MetadataTest extends TestCase
                 'enable.saml20-idp' => false,
             ],
             '[ARRAY]',
-            'simplesaml'
+            'simplesaml',
         );
         Configuration::setPreLoadedConfig($config, 'config.php');
 
@@ -206,8 +212,8 @@ class MetadataTest extends TestCase
 
         $c = new Controller\Metadata($config);
 
-        $this->expectException(\SimpleSAML\Error\Error::class);
-        $this->expectExceptionMessage('NOACCESS');
+        $this->expectException(Error\Error::class);
+        $this->expectExceptionMessage(Error\ErrorCodes::NOACCESS);
         $result = $c->metadata($request);
     }
 
@@ -224,8 +230,8 @@ class MetadataTest extends TestCase
         $c = new Controller\Metadata($this->config);
         $c->setMetadataStorageHandler($this->mdh);
 
-        $this->expectException(\SimpleSAML\Error\Error::class);
-        $this->expectExceptionMessage('METADATA');
+        $this->expectException(Error\Error::class);
+        $this->expectExceptionMessage(Error\ErrorCodes::METADATA);
         $result = $c->metadata($request);
     }
 

@@ -7,8 +7,7 @@ namespace SimpleSAML\Test\XML;
 use DOMDocument;
 use DOMElement;
 use Exception;
-use org\bovigo\vfs\vfsStream;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 use ReflectionClass;
 use SAML2\DOMDocumentFactory;
 use SimpleSAML\Configuration;
@@ -17,9 +16,8 @@ use SimpleSAML\XML\Signer;
 
 /**
  * Tests for SimpleSAML\XML\Signer.
- *
- * @covers \SimpleSAML\XML\Signer
  */
+#[CoversClass(Signer::class)]
 class SignerTest extends SigningTestCase
 {
     /** @var string */

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Test\Module\core\Auth\Process;
 
+use PHPUnit\Framework\Attributes\DoesNotPerformAssertions;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\Configuration;
 use SimpleSAML\Error\Exception as SspException;
@@ -47,9 +48,7 @@ class CardinalityTest extends TestCase
     protected function setUp(): void
     {
         Configuration::loadFromArray([], '[ARRAY]', 'simplesaml');
-        $this->httpUtils = $this->getMockBuilder(Utils\HTTP::class)
-                           ->setMethods(['redirectTrustedURL'])
-                           ->getMock();
+        $this->httpUtils = $this->createStub(Utils\HTTP::class);
     }
 
 
@@ -116,6 +115,7 @@ class CardinalityTest extends TestCase
     /**
      * Test maximum is out of bounds results in redirect
      */
+    #[DoesNotPerformAssertions]
     public function testMaxOutOfBounds(): void
     {
         $config = [
@@ -138,6 +138,7 @@ class CardinalityTest extends TestCase
     /**
      * Test minimum is out of bounds results in redirect
      */
+    #[DoesNotPerformAssertions]
     public function testMinOutOfBounds(): void
     {
         $config = [
@@ -160,6 +161,7 @@ class CardinalityTest extends TestCase
     /**
      * Test missing attribute results in redirect
      */
+    #[DoesNotPerformAssertions]
     public function testMissingAttribute(): void
     {
         $config = [

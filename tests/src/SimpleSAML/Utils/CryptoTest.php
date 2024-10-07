@@ -5,19 +5,17 @@ declare(strict_types=1);
 namespace SimpleSAML\Test\Utils;
 
 use InvalidArgumentException;
-use org\bovigo\vfs\vfsStream;
-use org\bovigo\vfs\vfsStreamDirectory;
+use org\bovigo\vfs\{vfsStream, vfsStreamDirectory};
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use ReflectionMethod;
 use SimpleSAML\Configuration;
 use SimpleSAML\Error;
 use SimpleSAML\Utils;
 
 /**
  * Tests for SimpleSAML\Utils\Crypto.
- *
- * @covers \SimpleSAML\Utils\Crypto
  */
+#[CoversClass(Utils\Crypto::class)]
 class CryptoTest extends TestCase
 {
     private const ROOTDIRNAME = 'testdir';
@@ -84,10 +82,10 @@ PHP;
         $this->config = Configuration::loadFromArray(
             [
                 'module.enable' => [],
-                'secretsalt' => 'SUPER_SECRET_SALT'
+                'secretsalt' => 'SUPER_SECRET_SALT',
             ],
             '[ARRAY]',
-            'simplesaml'
+            'simplesaml',
         );
 
         $this->root = vfsStream::setup(
@@ -95,7 +93,7 @@ PHP;
             null,
             [
                 self::DEFAULTCERTDIR => [],
-            ]
+            ],
         );
         $this->root_directory = vfsStream::url(self::ROOTDIRNAME);
         $this->certdir = $this->root_directory . DIRECTORY_SEPARATOR . self::DEFAULTCERTDIR;
@@ -106,7 +104,7 @@ PHP;
     /**
      * Test that aesDecrypt() works properly, being able to decrypt some previously known (and correct)
      * ciphertext.
-     *
+     * @deprecated
      */
     public function testAesDecrypt(): void
     {
@@ -119,13 +117,14 @@ PHP;
 uR2Yu0r4itInKx91D/l9y/08L5CIQyev9nAr27fh3Sshous4vbXRRcMcjqHDOrquD+2vqLyw7ygnbA9jA9TpB4hLZocvAWcTN8tyO82hiSY=
 CIPHER;
 
-        $decrypted = $this->cryptoUtils->aesDecrypt(base64_decode($ciphertext));
+        $decrypted = $this->cryptoUtils->aesDecrypt(base64_decode($ciphertext, true));
         $this->assertEquals($plaintext, $decrypted);
     }
 
 
     /**
      * @return void
+     * @deprecated
      */
     public function testAesDecryptWithSmallCipherTextThrowsException(): void
     {
@@ -146,6 +145,7 @@ CIPHER;
 
     /**
      * @return void
+     * @deprecated
      */
     public function testAesDecryptWithWrongSecretThrowsException(): void
     {
@@ -169,6 +169,7 @@ CIPHER;
     /**
      * Test that aesEncrypt() produces ciphertexts that aesDecrypt() can decrypt.
      *
+     * @deprecated
      */
     public function testAesEncrypt(): void
     {
@@ -193,7 +194,7 @@ CIPHER;
     {
         $this->assertEquals(
             trim($this->pem),
-            trim($this->cryptoUtils->der2pem($this->cryptoUtils->pem2der($this->pem)))
+            trim($this->cryptoUtils->der2pem($this->cryptoUtils->pem2der($this->pem))),
         );
     }
 
@@ -221,6 +222,7 @@ CIPHER;
 
 
     /**
+     * @deprecated
      */
     public function testGoodPwValid(): void
     {
@@ -234,6 +236,7 @@ CIPHER;
 
 
     /**
+     * @deprecated
      */
     public function testBadPwInvalid(): void
     {
@@ -248,6 +251,7 @@ CIPHER;
 
     /**
      * Check that hash cannot be used to authenticate ith.
+     * @deprecated
      */
     public function testHashAsPwInvalid(): void
     {
@@ -260,6 +264,7 @@ CIPHER;
 
 
     /**
+     * @deprecated
      */
     public function testSecureCompareEqual(): void
     {
@@ -270,6 +275,7 @@ CIPHER;
 
 
     /**
+     * @deprecated
      */
     public function testSecureCompareNotEqual(): void
     {
@@ -345,7 +351,7 @@ CIPHER;
                 'privatekey' => $filename,
                 'privatekey_pass' => $password,
             ],
-            'test'
+            'test',
         );
         $full_path = true;
 
@@ -371,7 +377,7 @@ CIPHER;
                 $prefix . 'privatekey' => $filename,
                 $prefix . 'privatekey_pass' => $password,
             ],
-            'test'
+            'test',
         );
         $full_path = true;
 
@@ -419,11 +425,11 @@ CIPHER;
                     [
                         'X509Certificate' => '',
                         'type' => 'NotX509Certificate',
-                        'signing' => true
+                        'signing' => true,
                     ],
                 ],
             ],
-            'test'
+            'test',
         );
 
         $res = $this->cryptoUtils->loadPublicKey($config);
@@ -442,11 +448,11 @@ CIPHER;
                     [
                         'X509Certificate' => '',
                         'type' => 'X509Certificate',
-                        'signing' => false
+                        'signing' => false,
                     ],
                 ],
             ],
-            'test'
+            'test',
         );
 
         $res = $this->cryptoUtils->loadPublicKey($config);
@@ -466,11 +472,11 @@ CIPHER;
                     [
                         'X509Certificate' => $x509certificate,
                         'type' => 'X509Certificate',
-                        'signing' => true
+                        'signing' => true,
                     ],
                 ],
             ],
-            'test'
+            'test',
         );
 
         /** @var array $pubkey */

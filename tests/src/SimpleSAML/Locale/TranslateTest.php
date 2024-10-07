@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Test\Locale;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\Configuration;
 use SimpleSAML\Locale\Translate;
 
 /**
- * @covers \SimpleSAML\Locale\Translate
  */
+#[CoversClass(Translate::class)]
 class TranslateTest extends TestCase
 {
     /**
@@ -31,8 +32,8 @@ class TranslateTest extends TestCase
     public function testTranslateFromArray(): void
     {
         $result = Translate::translateFromArray(
-            ['currentLanguage' => 'ia',],
-            [ 'ia' => 'interlingua', 'en' => 'english',]
+            ['currentLanguage' => 'ia'],
+            [ 'ia' => 'interlingua', 'en' => 'english'],
         );
         $this->assertEquals('interlingua', $result);
     }
@@ -40,8 +41,8 @@ class TranslateTest extends TestCase
     public function testTranslateFromArrayFallback(): void
     {
         $result = Translate::translateFromArray(
-            ['currentLanguage' => 'ia',],
-            [ 'eo' => 'esperanto', 'en' => 'english',]
+            ['currentLanguage' => 'ia'],
+            [ 'eo' => 'esperanto', 'en' => 'english'],
         );
         $this->assertEquals('english', $result);
     }
@@ -49,8 +50,8 @@ class TranslateTest extends TestCase
     public function testTranslateFromArrayFail(): void
     {
         $result = Translate::translateFromArray(
-            ['currentLanguage' => 'ia',],
-            [ 'eo' => 'esperanto',]
+            ['currentLanguage' => 'ia'],
+            [ 'eo' => 'esperanto'],
         );
         $this->assertEquals(null, $result);
     }

@@ -1,7 +1,6 @@
 <?php
 
-use SimpleSAML\Assert\Assert;
-use SimpleSAML\Auth;
+declare(strict_types=1);
 
 /**
  * Hook to for use with unit tests

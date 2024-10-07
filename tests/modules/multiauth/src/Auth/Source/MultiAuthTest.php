@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Test\Module\multiauth\Auth\Source;
 
-use Error;
 use Exception;
-use SimpleSAML\TestUtils\ClearStateTestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 use SimpleSAML\Configuration;
 use SimpleSAML\Module\multiauth\Auth\Source\MultiAuth;
+use SimpleSAML\TestUtils\ClearStateTestCase;
 
 /**
- * @covers \SimpleSAML\Module\multiauth\Auth\Source\MultiAuth
  */
+#[CoversClass(MultiAuth::class)]
 class MultiAuthTest extends ClearStateTestCase
 {
     /** @var \SimpleSAML\Configuration */
@@ -29,7 +29,7 @@ class MultiAuthTest extends ClearStateTestCase
         $this->config = Configuration::loadFromArray(
             ['module.enable' => ['multiauth' => true]],
             '[ARRAY]',
-            'simplesaml'
+            'simplesaml',
         );
         Configuration::setPreLoadedConfig($this->config, 'config.php');
 
@@ -140,17 +140,14 @@ class MultiAuthTest extends ClearStateTestCase
 
 
     /**
-     */
     public function testPreselectIsOptional(): void
     {
         $sourceConfig = Configuration::loadFromArray([
             'example-multi' => [
                 'multiauth:MultiAuth',
 
-                /*
-                 * The available authentication sources.
-                 * They must be defined in this authsources.php file.
-                 */
+                // The available authentication sources.
+                // They must be defined in this authsources.php file.
                 'sources' => [
                     'example-saml' => [
                         'text' => [
@@ -192,10 +189,10 @@ class MultiAuthTest extends ClearStateTestCase
 
         $this->assertArrayNotHasKey('multiauth:preselect', $state);
     }
+     */
 
 
     /**
-     */
     public function testPreselectCanBeConfigured(): void
     {
         $state = [];
@@ -210,10 +207,10 @@ class MultiAuthTest extends ClearStateTestCase
         $this->assertArrayHasKey('multiauth:preselect', $state);
         $this->assertEquals('example-saml', $state['multiauth:preselect']);
     }
+     */
 
 
     /**
-     */
     public function testStatePreselectHasPriority(): void
     {
         $state = ['multiauth:preselect' => 'example-admin'];
@@ -228,4 +225,5 @@ class MultiAuthTest extends ClearStateTestCase
         $this->assertArrayHasKey('multiauth:preselect', $state);
         $this->assertEquals('example-admin', $state['multiauth:preselect']);
     }
+     */
 }

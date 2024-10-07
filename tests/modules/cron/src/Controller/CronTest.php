@@ -4,21 +4,20 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Test\Module\cron\Controller;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\Configuration;
 use SimpleSAML\Module\cron\Controller;
 use SimpleSAML\Session;
 use SimpleSAML\Utils;
 use SimpleSAML\XHTML\Template;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Set of tests for the controllers in the "cron" module.
  *
- * @covers \SimpleSAML\Module\cron\Controller\Cron
  * @package SimpleSAML\Test
  */
+#[CoversClass(Controller\Cron::class)]
 class CronTest extends TestCase
 {
     /** @var \SimpleSAML\Configuration */
@@ -41,10 +40,10 @@ class CronTest extends TestCase
         $this->config = Configuration::loadFromArray(
             [
                 'module.enable' => ['cron' => true],
-                'secretsalt' => 'defaultsecretsalt'
+                'secretsalt' => 'defaultsecretsalt',
             ],
             '[ARRAY]',
-            'simplesaml'
+            'simplesaml',
         );
 
         $this->session = Session::getSessionFromRequest();
@@ -60,15 +59,15 @@ class CronTest extends TestCase
         Configuration::setPreLoadedConfig(
             Configuration::loadFromArray(
                 [
-                    'key' => 'secret',
+                    'key' => 'verysecret',
                     'allowed_tags' => ['daily'],
                     'sendemail' => false,
                 ],
                 '[ARRAY]',
-                'simplesaml'
+                'simplesaml',
             ),
             'module_cron.php',
-            'simplesaml'
+            'simplesaml',
         );
     }
 
@@ -85,8 +84,8 @@ class CronTest extends TestCase
 
         $this->assertTrue($response->isSuccessful());
         $expect = [
-            'exec_href' => 'http://localhost/simplesaml/module.php/cron/run/daily/secret',
-            'href' => 'http://localhost/simplesaml/module.php/cron/run/daily/secret/xhtml',
+            'exec_href' => 'http://localhost/simplesaml/module.php/cron/run/daily/verysecret',
+            'href' => 'http://localhost/simplesaml/module.php/cron/run/daily/verysecret/xhtml',
             'tag' => 'daily',
             'int' => '02 0 * * *',
         ];
@@ -99,10 +98,10 @@ class CronTest extends TestCase
      */
     public function testRun(): void
     {
-        $_SERVER['REQUEST_URI'] = '/module.php/cron/run/daily/secret';
+        $_SERVER['REQUEST_URI'] = '/module.php/cron/run/daily/verysecret';
 
         $c = new Controller\Cron($this->config, $this->session);
-        $response = $c->run('daily', 'secret');
+        $response = $c->run('daily', 'verysecret');
 
         $this->assertInstanceOf(Template::class, $response);
         $this->assertTrue($response->isSuccessful());

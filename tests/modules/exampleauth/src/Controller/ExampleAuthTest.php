@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Test\Module\exampleauth\Controller;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\Auth;
 use SimpleSAML\Configuration;
@@ -16,9 +17,8 @@ use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Set of tests for the controllers in the "exampleauth" module.
- *
- * @covers \SimpleSAML\Module\exampleauth\Controller\ExampleAuth
  */
+#[CoversClass(Controller\ExampleAuth::class)]
 class ExampleAuthTest extends TestCase
 {
     /** @var \SimpleSAML\Configuration */
@@ -40,7 +40,7 @@ class ExampleAuthTest extends TestCase
                 'module.enable' => ['exampleauth' => true],
             ],
             '[ARRAY]',
-            'simplesaml'
+            'simplesaml',
         );
 
         $this->session = Session::getSessionFromRequest();
@@ -207,7 +207,7 @@ class ExampleAuthTest extends TestCase
         $request = Request::create(
             '/redirecttest',
             'GET',
-            ['StateId' => 'someState']
+            ['StateId' => 'someState'],
         );
 
         $c = new Controller\ExampleAuth($this->config, $this->session);

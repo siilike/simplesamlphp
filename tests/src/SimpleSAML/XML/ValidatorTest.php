@@ -6,8 +6,7 @@ namespace SimpleSAML\Test\XML;
 
 use DOMElement;
 use Exception;
-use org\bovigo\vfs\vfsStream;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 use SAML2\DOMDocumentFactory;
 use SimpleSAML\Test\SigningTestCase;
 use SimpleSAML\XML\Signer;
@@ -15,9 +14,8 @@ use SimpleSAML\XML\Validator;
 
 /**
  * Tests for SimpleSAML\XML\Validator.
- *
- * @covers \SimpleSAML\XML\Validator
  */
+#[CoversClass(Validator::class)]
 class ValidatorTest extends SigningTestCase
 {
     /**
@@ -76,7 +74,7 @@ class ValidatorTest extends SigningTestCase
         $validator = new Validator(
             $doc,
             'node',
-            ['PEM' => $this->good_certificate]
+            ['PEM' => $this->good_certificate],
         );
 
         $result = $validator->isNodeValidated($node);
@@ -106,7 +104,7 @@ class ValidatorTest extends SigningTestCase
         $validator = new Validator(
             $doc,
             'node1',
-            ['PEM' => $this->good_certificate]
+            ['PEM' => $this->good_certificate],
         );
 
         $result = $validator->isNodeValidated($node2);

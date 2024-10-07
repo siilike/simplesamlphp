@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Test\Store;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\MockObject\MockObject;
 use Predis\Client;
 use SimpleSAML\Configuration;
 use SimpleSAML\Store;
-use SimpleSAML\Store\StoreFactory;
 
 /**
  * Tests for the Redis store.
@@ -17,13 +16,13 @@ use SimpleSAML\Store\StoreFactory;
  * For the full copyright and license information, please view the LICENSE file that was distributed with this source
  * code.
  *
- * @covers \SimpleSAML\Store\RedisStore
  * @package simplesamlphp/simplesamlphp
  */
+#[CoversClass(Store\RedisStore::class)]
 class RedisStoreTest extends TestCase
 {
-    /** @var \PHPUnit\Framework\MockObject\MockObject */
-    protected MockObject $mocked_redis;
+    /** @var \Predis\Client */
+    protected Client $client;
 
     /** @var \SimpleSAML\Store\RedisStore */
     protected Store\RedisStore $store;
@@ -38,24 +37,43 @@ class RedisStoreTest extends TestCase
     {
         $this->config = [];
 
-        $this->mocked_redis = $this->getMockBuilder(Client::class)
-                                   ->setMethods(['get', 'set', 'setex', 'del', 'disconnect', '__destruct'])
-                                   ->disableOriginalConstructor()
-                                   ->getMock();
+        $this->client = new class ($this) extends Client
+        {
+            public function __construct(
+                protected RedisStoreTest $unitTest,
+            ) {
+            }
 
-        $this->mocked_redis->method('get')
-                           ->will($this->returnCallback([$this, 'getMocked']));
+            public function __deconstruct()
+            {
+            }
 
-        $this->mocked_redis->method('set')
-                           ->will($this->returnCallback([$this, 'setMocked']));
+            public function disconnect(): void
+            {
+            }
 
-        $this->mocked_redis->method('setex')
-                           ->will($this->returnCallback([$this, 'setexMocked']));
+            public function get(string $str): ?string
+            {
+                return $this->unitTest->getMocked($str);
+            }
 
-        $this->mocked_redis->method('del')
-                           ->will($this->returnCallback([$this, 'delMocked']));
+            public function set(string $str, mixed $value): void
+            {
+                $this->unitTest->setMocked($str, $value);
+            }
 
-        $this->store = new Store\RedisStore($this->mocked_redis);
+            public function setEx(string $str, int $expire, mixed $value): void
+            {
+                $this->unitTest->setExMocked($str, $expire, $value);
+            }
+
+            public function del(string $str): void
+            {
+                $this->unitTest->delMocked($str);
+            }
+        };
+
+        $this->store = new Store\RedisStore($this->client);
     }
 
 
@@ -73,7 +91,7 @@ class RedisStoreTest extends TestCase
      * @param string $key
      * @param mixed $value
      */
-    public function setMocked(string $key, $value): void
+    public function setMocked(string $key, mixed $value): void
     {
         $this->config[$key] = $value;
     }
@@ -84,7 +102,7 @@ class RedisStoreTest extends TestCase
      * @param int $expire
      * @param mixed $value
      */
-    public function setexMocked(string $key, int $expire, $value): void
+    public function setexMocked(string $key, int $expire, mixed $value): void
     {
         // Testing expiring data is more trouble than it's worth for now
         $this->setMocked($key, $value);
@@ -101,7 +119,6 @@ class RedisStoreTest extends TestCase
 
 
     /**
-     * @test
      */
     public function testRedisInstance(): void
     {
@@ -113,9 +130,37 @@ class RedisStoreTest extends TestCase
         $this->assertInstanceOf(Store\RedisStore::class, $this->store);
     }
 
+    /**
+     */
+    public function testRedisInstanceWithInsecureTLS(): void
+    {
+        $config = Configuration::loadFromArray([
+            'store.type' => 'redis',
+            'store.redis.prefix' => 'phpunit_',
+            'store.redis.tls' => true,
+            'store.redis.insecure' => true,
+        ], '[ARRAY]', 'simplesaml');
+
+        $this->assertInstanceOf(Store\RedisStore::class, $this->store);
+    }
 
     /**
-     * @test
+     */
+    public function testRedisInstanceWithSecureTLS(): void
+    {
+        $config = Configuration::loadFromArray([
+            'store.type' => 'redis',
+            'store.redis.prefix' => 'phpunit_',
+            'store.redis.tls' => true,
+            'store.redis.ca_certificate' => '/tmp/ssl/pki_roots.crt.pem',
+            'store.redis.certificate' => '/tmp/ssl/phpunit.crt.pem',
+            'store.redis.privatekey' => '/tmp/ssl/phpunit.key.pem',
+        ], '[ARRAY]', 'simplesaml');
+
+        $this->assertInstanceOf(Store\RedisStore::class, $this->store);
+    }
+
+    /**
      */
     public function testRedisInstanceWithPassword(): void
     {
@@ -129,7 +174,6 @@ class RedisStoreTest extends TestCase
     }
 
     /**
-     * @test
      */
     public function testRedisInstanceWithPasswordAndUsername(): void
     {
@@ -144,9 +188,6 @@ class RedisStoreTest extends TestCase
     }
 
     /**
-     * @covers \SimpleSAML\Store\StoreFactory::getInstance
-     * @covers \SimpleSAML\Store\RedisStore::__construct
-     * @test
      */
     public function testRedisSentinelInstance(): void
     {
@@ -160,7 +201,6 @@ class RedisStoreTest extends TestCase
     }
 
     /**
-     * @test
      */
     public function testInsertData(): void
     {
@@ -175,7 +215,6 @@ class RedisStoreTest extends TestCase
 
 
     /**
-     * @test
      */
     public function testInsertExpiringData(): void
     {
@@ -190,7 +229,6 @@ class RedisStoreTest extends TestCase
 
 
     /**
-     * @test
      */
     public function testGetEmptyData(): void
     {
@@ -201,7 +239,6 @@ class RedisStoreTest extends TestCase
 
 
     /**
-     * @test
      */
     public function testOverwriteData(): void
     {
@@ -218,7 +255,6 @@ class RedisStoreTest extends TestCase
 
 
     /**
-     * @test
      */
     public function testDeleteData(): void
     {

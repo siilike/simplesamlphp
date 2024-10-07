@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Test\XHTML;
 
-use Exception;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\Configuration;
-use SimpleSAML\Locale\TwigTranslator;
 use SimpleSAML\Locale\Translate;
+use SimpleSAML\Locale\TwigTranslator;
+use SimpleSAML\Module;
 use SimpleSAML\XHTML\Template;
 use Symfony\Bridge\Twig\Extension\TranslationExtension;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Finder\SplFileInfo;
 use Twig\Environment;
 use Twig\Extra\Intl\IntlExtension;
 use Twig\Loader\FilesystemLoader;
@@ -20,8 +20,8 @@ use Twig\TwigFilter;
 use Twig\TwigFunction;
 
 /**
- * @covers \SimpleSAML\XHTML\Template
  */
+#[CoversClass(Template::class)]
 class TemplateTranslationTest extends TestCase
 {
     public function testCoreCardinalityErrorTemplate(): void
@@ -55,7 +55,8 @@ class TemplateTranslationTest extends TestCase
         $t->data['username'] = 'h.c oersted';
         $t->data['rememberUsernameEnabled'] = false;
         $t->data['rememberMeEnabled'] = false;
-        $t->data['AuthState'] = 'abc123';
+        $t->data['AuthState'] = '_abc123';
+        $t->data['formURL'] = Module::getModuleURL('core/loginuserpass');
 
         $getContent = function (): string {
             /** @var \SimpleSAML\XHTML\Template $this */
@@ -120,7 +121,7 @@ class TemplateTranslationTest extends TestCase
 
         $this->assertStringContainsString(
             'Your session is valid for ' . $t->data['remaining'] . ' seconds from now.',
-            $html
+            $html,
         );
     }
 
@@ -142,16 +143,16 @@ class TemplateTranslationTest extends TestCase
                 'asset',
                 function () {
                     return '';
-                }
-            )
+                },
+            ),
         );
         $twig->addFunction(
             new TwigFunction(
                 'moduleURL',
                 function () {
                     return '';
-                }
-            )
+                },
+            ),
         );
 
         // Fake filters
@@ -161,16 +162,16 @@ class TemplateTranslationTest extends TestCase
                 function () {
                     return '';
                 },
-                ['needs_context' => true]
-            )
+                ['needs_context' => true],
+            ),
         );
         $twig->addFilter(
             new TwigFilter(
                 'entityDisplayName',
                 function () {
                     return '';
-                }
-            )
+                },
+            ),
         );
 
         $files = Finder::create()
@@ -178,8 +179,8 @@ class TemplateTranslationTest extends TestCase
             ->in(
                 [
                     $root . '/templates',
-                    $root . '/modules'
-                ]
+                    $root . '/modules',
+                ],
             );
 
         foreach ($files as $file) {

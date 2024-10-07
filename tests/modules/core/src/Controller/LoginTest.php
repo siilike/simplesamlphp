@@ -4,19 +4,12 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Test\Module\core\Controller;
 
-use Exception;
-use ReflectionClass;
-use SimpleSAML\Auth;
-use SimpleSAML\Configuration;
-use SimpleSAML\Error;
-use SimpleSAML\HTTP\RunnableResponse;
-use SimpleSAML\Locale\Localization;
+use PHPUnit\Framework\Attributes\CoversClass;
+use SimpleSAML\{Auth, Configuration, Error};
 use SimpleSAML\Module\core\Controller;
 use SimpleSAML\Module\core\Auth\UserPassBase;
-use SimpleSAML\Module\core\Auth\UserPassOrgBase;
 use SimpleSAML\TestUtils\ClearStateTestCase;
 use SimpleSAML\XHTML\Template;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -25,9 +18,9 @@ use Symfony\Component\HttpFoundation\Request;
  * For now, this test extends ClearStateTestCase so that it doesn't interfere with other tests. Once every class has
  * been made PSR-7-aware, that won't be necessary any longer.
  *
- * @covers \SimpleSAML\Module\core\Controller\Login
  * @package SimpleSAML\Test
  */
+#[CoversClass(Controller\Login::class)]
 class LoginTest extends ClearStateTestCase
 {
     /** @var \SimpleSAML\Configuration */
@@ -48,9 +41,10 @@ class LoginTest extends ClearStateTestCase
             [
                 'baseurlpath' => 'https://example.org/simplesaml',
                 'module.enable' => ['exampleauth' => true],
+                'trusted.url.domains' => [],
             ],
             '[ARRAY]',
-            'simplesaml'
+            'simplesaml',
         );
 
         Configuration::setPreLoadedConfig($this->config, 'config.php');
@@ -99,7 +93,7 @@ class LoginTest extends ClearStateTestCase
         $request = Request::create(
             '/loginuserpass',
             'GET',
-            ['AuthState' => 'someState'],
+            ['AuthState' => '_abc123'],
         );
 
         $c = new Controller\Login($this->config);

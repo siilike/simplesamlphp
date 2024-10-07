@@ -4,29 +4,25 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Test\Utils;
 
-use DOMComment;
 use DOMDocument;
 use DOMElement;
 use DOMException;
 use DOMText;
 use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SAML2\DOMDocumentFactory;
-use SimpleSAML\Configuration;
-use SimpleSAML\Error;
 use SimpleSAML\Utils;
 
 /**
  * Tests for SimpleSAML\Utils\XML.
- *
- * @covers \SimpleSAML\Utils\XML
  */
+#[CoversClass(Utils\XML::class)]
 class XMLTest extends TestCase
 {
     private const FRAMEWORK = 'vendor/simplesamlphp/saml2/tests/resources/xml';
 
     /**
-     * @test
      */
     public function testIsDomNodeOfTypeBasic(): void
     {
@@ -43,7 +39,6 @@ class XMLTest extends TestCase
 
 
     /**
-     * @test
      */
     public function testIsDomNodeOfTypeMissingNamespace(): void
     {
@@ -59,7 +54,6 @@ class XMLTest extends TestCase
 
 
     /**
-     * @test
      */
     public function testIsDomNodeOfTypeEmpty(): void
     {
@@ -76,7 +70,6 @@ class XMLTest extends TestCase
 
 
     /**
-     * @test
      */
     public function testIsDomNodeOfTypeShortcut(): void
     {
@@ -94,7 +87,6 @@ class XMLTest extends TestCase
 
 
     /**
-     * @test
      */
     public function testIsDomNodeOfTypeIncorrectName(): void
     {
@@ -112,7 +104,6 @@ class XMLTest extends TestCase
 
 
     /**
-     * @test
      */
     public function testIsDomNodeOfTypeIncorrectNamespace(): void
     {
@@ -130,7 +121,6 @@ class XMLTest extends TestCase
 
 
     /**
-     * @test
      */
     public function testFormatDomElementBasic(): void
     {
@@ -154,7 +144,6 @@ NOWDOC;
 
 
     /**
-     * @test
      */
     public function testFormatDomElementNested(): void
     {
@@ -182,7 +171,6 @@ NOWDOC;
 
 
     /**
-     * @test
      */
     public function testFormatDomElementIndentBase(): void
     {
@@ -211,7 +199,6 @@ HEREDOC;
 
 
     /**
-     * @test
      */
     public function testFormatDomElementTextAndChild(): void
     {
@@ -236,7 +223,6 @@ HEREDOC;
 
 
     /**
-     * @test
      */
     public function testFormatXmlStringBasic(): void
     {
@@ -256,7 +242,6 @@ NOWDOC;
 
 
     /**
-     * @test
      */
     public function testFormatXmlStringMalformedXml(): void
     {
@@ -270,7 +255,6 @@ NOWDOC;
 
 
     /**
-     * @test
      */
     public function testIsValidMalformedXml(): void
     {

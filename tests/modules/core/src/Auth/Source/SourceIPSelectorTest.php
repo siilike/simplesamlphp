@@ -4,17 +4,20 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Test\Module\core\Auth\Source;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\Assert\AssertionFailedException;
 use SimpleSAML\Auth;
 use SimpleSAML\Configuration;
 use SimpleSAML\Error\Exception;
+use SimpleSAML\Module\core\Auth\Source\AbstractSourceSelector;
 use SimpleSAML\Module\core\Auth\Source\SourceIPSelector;
 
 /**
- * @covers \SimpleSAML\Module\core\Auth\Source\AbstractSourceSelector
- * @covers \SimpleSAML\Module\core\Auth\Source\SourceIPSelector
  */
+#[CoversClass(SourceIPSelector::class)]
+#[CoversClass(AbstractSourceSelector::class)]
 class SourceIPSelectorTest extends TestCase
 {
     /** @var \SimpleSAML\Configuration */
@@ -31,7 +34,7 @@ class SourceIPSelectorTest extends TestCase
         $this->config = Configuration::loadFromArray(
             ['module.enable' => ['core' => true]],
             '[ARRAY]',
-            'simplesaml'
+            'simplesaml',
         );
         Configuration::setPreLoadedConfig($this->config, 'config.php');
 
@@ -136,10 +139,10 @@ class SourceIPSelectorTest extends TestCase
 
 
     /**
-     * @dataProvider provideClientIP
      * @param string $ip  The client IP
      * @param string $expected  The expected authsource
      */
+    #[DataProvider('provideClientIP')]
     public function testSelectAuthSource(string $ip, string $expected): void
     {
         $info = ['AuthId' => 'selector'];
@@ -226,7 +229,7 @@ class SourceIPSelectorTest extends TestCase
     /**
      * @return array
      */
-    public function provideClientIP(): array
+    public static function provideClientIP(): array
     {
         return [
             ['127.0.0.2', 'external'],

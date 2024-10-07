@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SimpleSAML\Test\Module\core\Auth\Process;
 
 use Exception;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SAML2\Constants;
 use SAML2\XML\saml\NameID;
@@ -14,9 +15,8 @@ use SimpleSAML\Utils;
 
 /**
  * Test for the core:TargetedID filter.
- *
- * @covers \SimpleSAML\Module\core\Auth\Process\TargetedID
  */
+#[CoversClass(TargetedID::class)]
 class TargetedIDTest extends TestCase
 {
     /** @var \SimpleSAML\Configuration */
@@ -143,7 +143,7 @@ class TargetedIDTest extends TestCase
             '#^<saml:NameID xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" NameQualifier="urn:example:src:id"' .
             ' SPNameQualifier="joe"' .
             ' Format="urn:oasis:names:tc:SAML:2.0:nameid-format:persistent">[0-9a-f]{40}</saml:NameID>$#',
-            strval($attributes['eduPersonTargetedID'][0])
+            strval($attributes['eduPersonTargetedID'][0]),
         );
     }
 

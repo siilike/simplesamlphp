@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace SimpleSAML\Test\Module\saml\Auth\Process;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use SimpleSAML\Module\saml\Auth\Process\FilterScopes;
 
 /**
  * Test for the saml:FilterScopes filter.
  *
- * @covers \SimpleSAML\Module\saml\Auth\Process\FilterScopes
- *
  * @package SimpleSAMLphp
  */
+#[CoversClass(FilterScopes::class)]
 class FilterScopesTest extends TestCase
 {
     /**
@@ -150,7 +150,7 @@ class FilterScopesTest extends TestCase
                     'jdoe@example.com',
                 ],
             ],
-            $result['Attributes']
+            $result['Attributes'],
         );
 
         // test attribute missing scope

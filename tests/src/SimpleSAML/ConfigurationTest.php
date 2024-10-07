@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SimpleSAML\Test;
 
 use Exception;
+use PHPUnit\Framework\Attributes\CoversClass;
 use SAML2\Constants;
 use SimpleSAML\Assert\AssertionFailedException;
 use SimpleSAML\Configuration;
@@ -13,9 +14,8 @@ use SimpleSAML\TestUtils\ClearStateTestCase;
 
 /**
  * Tests for \SimpleSAML\Configuration
- *
- * @covers \SimpleSAML\Configuration
  */
+#[CoversClass(Configuration::class)]
 class ConfigurationTest extends ClearStateTestCase
 {
     /**
@@ -717,21 +717,14 @@ class ConfigurationTest extends ClearStateTestCase
          * tests for AssertionConsumerService.
          */
         $acs_eps = [
-            // just a string with the location
-            'https://example.com/endpoint.php',
-            // an array of strings with location of different endpoints
-            [
-                'https://www1.example.com/endpoint.php',
-                'https://www2.example.com/endpoint.php',
-            ],
-            // define location and binding
+            // 0. define location and binding
             [
                 [
                     'Location' => 'https://example.com/endpoint.php',
                     'Binding' => Constants::BINDING_HTTP_POST,
                 ],
             ],
-            // define the ResponseLocation too
+            // 1. define the ResponseLocation too
             [
                 [
                     'Location' => 'https://example.com/endpoint.php',
@@ -739,7 +732,7 @@ class ConfigurationTest extends ClearStateTestCase
                     'ResponseLocation' => 'https://example.com/endpoint.php',
                 ],
             ],
-            // make sure indexes are NOT taken into account (they just identify endpoints)
+            // 2. make sure indexes are NOT taken into account (they just identify endpoints)
             [
                 [
                     'index' => 1,
@@ -752,7 +745,7 @@ class ConfigurationTest extends ClearStateTestCase
                     'Binding' => Constants::BINDING_HTTP_POST,
                 ],
             ],
-            // make sure isDefault has priority over indexes
+            // 3. make sure isDefault has priority over indexes
             [
                 [
                     'index' => 1,
@@ -766,7 +759,7 @@ class ConfigurationTest extends ClearStateTestCase
                     'Binding' => Constants::BINDING_HTTP_REDIRECT,
                 ],
             ],
-            // make sure endpoints with invalid bindings are ignored and those marked as NOT default are still used
+            // 4. make sure endpoints with invalid bindings are ignored and those marked as NOT default are still used
             [
                 [
                     'index' => 1,
@@ -782,20 +775,10 @@ class ConfigurationTest extends ClearStateTestCase
             ],
         ];
         $acs_expected_eps = [
-            // output should be completed with the default binding (HTTP-POST for ACS)
-            [
-                'Location' => 'https://example.com/endpoint.php',
-                'Binding' => Constants::BINDING_HTTP_POST,
-            ],
-            // we should just get the first endpoint with the default binding
-            [
-                'Location' => 'https://www1.example.com/endpoint.php',
-                'Binding' => Constants::BINDING_HTTP_POST,
-            ],
             // if we specify the binding, we should get it back
             [
                 'Location' => 'https://example.com/endpoint.php',
-                'Binding' => Constants::BINDING_HTTP_POST
+                'Binding' => Constants::BINDING_HTTP_POST,
             ],
             // if we specify ResponseLocation, we should get it back too
             [
@@ -822,16 +805,6 @@ class ConfigurationTest extends ClearStateTestCase
                 'isDefault' => false,
                 'Location' => 'https://www2.example.com/endpoint.php',
                 'Binding' => Constants::BINDING_HTTP_POST,
-            ]
-        ];
-
-        $a = [
-            'metadata-set' => 'saml20-sp-remote',
-            'ArtifactResolutionService' => 'https://example.com/ars',
-            'SingleSignOnService' => 'https://example.com/sso',
-            'SingleLogoutService' => [
-                'Location' => 'https://example.com/slo',
-                'Binding' => 'valid_binding', // test unknown bindings if we don't specify a list of valid ones
             ],
         ];
 
@@ -843,14 +816,36 @@ class ConfigurationTest extends ClearStateTestCase
             Constants::BINDING_SOAP,
         ];
 
+        $a = [
+            'metadata-set' => 'saml20-sp-remote',
+            'ArtifactResolutionService' => [
+                [
+                    'Location' => 'https://example.com/ars',
+                ],
+            ],
+            'SingleSignOnService' => [
+                [
+                    'Location' => 'https://example.com/sso',
+                ],
+            ],
+            'SingleLogoutService' => [
+                [
+                    'Location' => 'https://example.com/slo',
+                    'Binding' => 'valid_binding', // test unknown bindings if we don't specify a list of valid ones
+                ],
+            ],
+        ];
+
+
         // run all general tests with AssertionConsumerService endpoint type
         foreach ($acs_eps as $i => $ep) {
             $a['AssertionConsumerService'] = $ep;
             $c = Configuration::loadFromArray($a);
-            $this->assertEquals($acs_expected_eps[$i], $c->getDefaultEndpoint(
+            $actual = $c->getDefaultEndpoint(
                 'AssertionConsumerService',
-                $valid_bindings
-            ));
+                $valid_bindings,
+            );
+            $this->assertEquals($acs_expected_eps[$i], $actual);
         }
 
         $a['metadata-set'] = 'saml20-idp-remote';
@@ -860,14 +855,14 @@ class ConfigurationTest extends ClearStateTestCase
                 'Location' => 'https://example.com/ars',
                 'Binding' => Constants::BINDING_SOAP,
             ],
-            $c->getDefaultEndpoint('ArtifactResolutionService')
+            $c->getDefaultEndpoint('ArtifactResolutionService'),
         );
         $this->assertEquals(
             [
                 'Location' => 'https://example.com/slo',
                 'Binding' => Constants::BINDING_HTTP_REDIRECT,
             ],
-            $c->getDefaultEndpoint('SingleLogoutService')
+            $c->getDefaultEndpoint('SingleLogoutService'),
         );
 
         // test for no valid endpoints specified
@@ -885,13 +880,13 @@ class ConfigurationTest extends ClearStateTestCase
         } catch (Exception $e) {
             $this->assertEquals(
                 '[ARRAY][\'SingleLogoutService\']:Could not find a supported SingleLogoutService ' . 'endpoint.',
-                $e->getMessage()
+                $e->getMessage(),
             );
         }
         $a['metadata-set'] = 'foo';
         $c = Configuration::loadFromArray($a);
         try {
-            $c->getDefaultEndpoint('SingleSignOnService');
+            $v = $c->getDefaultEndpoint('SingleSignOnService');
             $this->fail('No valid metadata set specified.');
         } catch (Exception $e) {
             $this->assertStringStartsWith('Missing default binding for', $e->getMessage());
@@ -904,21 +899,6 @@ class ConfigurationTest extends ClearStateTestCase
      */
     public function testGetEndpoints(): void
     {
-        // test response location for old-style configurations
-        $c = Configuration::loadFromArray([
-            'metadata-set' => 'saml20-idp-remote',
-            'SingleSignOnService' => 'https://example.com/endpoint.php',
-            'SingleSignOnServiceResponse' => 'https://example.com/response.php',
-        ]);
-        $e = [
-            [
-                'Location' => 'https://example.com/endpoint.php',
-                'Binding' => Constants::BINDING_HTTP_REDIRECT,
-                'ResponseLocation' => 'https://example.com/response.php',
-            ]
-        ];
-        $this->assertEquals($e, $c->getEndpoints('SingleSignOnService'));
-
         // test for input failures
 
         // define a basic configuration array
@@ -933,7 +913,7 @@ class ConfigurationTest extends ClearStateTestCase
             10,
             // invalid definition of endpoint inside the endpoints array
             [
-                1234
+                1234,
             ],
             // missing location
             [
@@ -945,7 +925,7 @@ class ConfigurationTest extends ClearStateTestCase
             [
                 [
                     'Location' => 1234,
-                ]
+                ],
             ],
             // missing binding
             [
@@ -980,7 +960,7 @@ class ConfigurationTest extends ClearStateTestCase
 
         // define a set of exception messages to expect
         $msgs = [
-            'Expected array or string.',
+            'The configuration is invalid: Expected an array. Got: integer',
             'Expected a string or an array.',
             'Missing Location.',
             'Location must be a string.',
@@ -1078,12 +1058,59 @@ class ConfigurationTest extends ClearStateTestCase
     public function testGetConfigNonexistentFilePreload(): void
     {
         $c = Configuration::loadFromArray([
-            'key' => 'value'
+            'key' => 'value',
         ]);
         $virtualFile = 'nonexistent-preload.php';
         Configuration::setPreLoadedConfig($c, $virtualFile);
         $nc = Configuration::getConfig($virtualFile);
         $this->assertEquals('value', $nc->getOptionalValue('key', null));
+    }
+
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function testCanLoadDefinedConfigFromFile(): void
+    {
+        $testConfigDir = dirname(__FILE__, 3) . DIRECTORY_SEPARATOR . 'config';
+        putenv('SIMPLESAMLPHP_CONFIG_DIR=' .  $testConfigDir);
+
+        $config = Configuration::getConfig('defined_config.php');
+        $this->assertArrayHasKey('defined', $config->toArray());
+    }
+
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function testCanLoadReturnedConfigFromFile(): void
+    {
+        $testConfigDir = dirname(__FILE__, 3) . DIRECTORY_SEPARATOR . 'config';
+        putenv('SIMPLESAMLPHP_CONFIG_DIR=' .  $testConfigDir);
+
+        $config = Configuration::getConfig('returned_config.php');
+        $this->assertArrayHasKey('returned', $config->toArray());
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function testLoadFromFileConfigurationError(): void
+    {
+        $virtualFile = 'nonexistent-preload.php';
+        $tmpfname = tempnam('/tmp', $virtualFile);
+
+        $handle = fopen($tmpfname, 'wb');
+        fwrite($handle, 'writing to tempfile');
+        fclose($handle);
+
+        $this->expectException(Error\ConfigurationError::class);
+        Configuration::getConfig($tmpfname);
+
+        unlink($tmpfname);
     }
 
 
@@ -1095,7 +1122,7 @@ class ConfigurationTest extends ClearStateTestCase
     public function testLoadInstanceFromArray(): void
     {
         $c = [
-            'key' => 'value'
+            'key' => 'value',
         ];
         // test loading a custom instance
         Configuration::loadFromArray($c, '', 'dummy');
